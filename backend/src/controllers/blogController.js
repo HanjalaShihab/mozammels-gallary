@@ -50,22 +50,63 @@ exports.getPost = async (req, res) => {
 // Create blog post
 exports.createPost = async (req, res) => {
   try {
+    console.log('\n===== BLOG CREATE REQUEST =====');
+    console.log('Time:', new Date().toISOString());
+    console.log('Body received:', JSON.stringify(req.body, null, 2));
+    
     const postData = {
       ...req.body,
       coverImage: req.body.coverImage || (req.file ? req.file.path : null)
     };
     
-    // Generate slug if not provided
-    if (!postData.slug && postData.title) {
-      postData.slug = postData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    console.log('Post data before slug generation:', {
+      title: postData.title,
+      slug: postData.slug,
+      excerpt: postData.excerpt,
+      contentLength: postData.content ? postData.content.length : 0,
+      coverImage: postData.coverImage ? 'present' : 'missing'
+    });
+    
+    // Generate slug if not provided or empty
+    if (!postData.slug || postData.slug.trim() === '') {
+      if (postData.title) {
+        postData.slug = postData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        console.log('Generated slug from title:', postData.slug);
+      } else {
+        console.error('NO TITLE PROVIDED');
+        throw new Error('Title is required');
+      }
     }
     
+    // Ensure slug is lowercase and valid
+    postData.slug = postData.slug.toLowerCase().trim();
+    console.log('Final slug:', postData.slug);
+    
+    console.log('Creating new Blog instance...');
     const post = new Blog(postData);
+    
+    console.log('Calling save() on blog instance...');
     const newPost = await post.save();
+    
+    console.log('✓ Blog saved successfully!');
+    console.log('Saved blog ID:', newPost._id);
+    console.log('Saved blog title:', newPost.title);
+    
     res.status(201).json(newPost);
   } catch (error) {
-    console.error('Blog creation error:', error);
-    res.status(400).json({ message: error.message, details: error.errors });
+    console.error('\n===== BLOG CREATE ERROR =====');
+    console.error('Error message:', error.message);
+    console.error('Error name:', error.name);
+    if (error.errors) {
+      console.error('Validation errors:', error.errors);
+    }
+    console.error('Full error:', error);
+    
+    res.status(400).json({ 
+      message: error.message, 
+      details: error.errors,
+      errorName: error.name
+    });
   }
 };
 

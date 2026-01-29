@@ -15,8 +15,21 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  console.log(`[API] ${config.method.toUpperCase()} ${config.url}`, config.data || '');
   return config;
 });
+
+// Log responses
+api.interceptors.response.use(
+  (response) => {
+    console.log(`[API Response] ${response.status}`, response.data);
+    return response;
+  },
+  (error) => {
+    console.error('[API Error]', error.response?.status, error.response?.data || error.message);
+    return Promise.reject(error);
+  }
+);
 
 // Auth
 export const authRegister = async (data) => {

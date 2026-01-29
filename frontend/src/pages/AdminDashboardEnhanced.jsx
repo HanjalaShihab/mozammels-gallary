@@ -187,46 +187,70 @@ const AdminDashboard = () => {
     e.preventDefault();
     
     try {
+      console.log('\n========== FORM SUBMIT ==========');
+      console.log('Mode:', modalMode);
+      console.log('Tab:', activeTab);
+      console.log('Form data:', JSON.stringify(formData, null, 2));
+      
+      let result;
       if (modalMode === 'add') {
         switch (activeTab) {
           case 'artworks':
-            await createArtwork(formData);
+            console.log('→ Creating artwork');
+            result = await createArtwork(formData);
             break;
           case 'shop':
-            await createShopItem(formData);
+            console.log('→ Creating shop item');
+            result = await createShopItem(formData);
             break;
           case 'courses':
-            await createCourse(formData);
+            console.log('→ Creating course');
+            result = await createCourse(formData);
             break;
           case 'blogs':
-            await createBlog(formData);
+            console.log('→ Creating blog');
+            result = await createBlog(formData);
             break;
         }
       } else {
         switch (activeTab) {
           case 'artworks':
-            await updateArtwork(currentItem._id, formData);
+            result = await updateArtwork(currentItem._id, formData);
             break;
           case 'shop':
-            await updateShopItem(currentItem._id, formData);
+            result = await updateShopItem(currentItem._id, formData);
             break;
           case 'courses':
-            await updateCourse(currentItem._id, formData);
+            result = await updateCourse(currentItem._id, formData);
             break;
           case 'blogs':
-            await updateBlog(currentItem._id, formData);
+            result = await updateBlog(currentItem._id, formData);
             break;
         }
       }
       
+      console.log('✓ API call successful!');
+      console.log('Result ID:', result._id);
+      
       setShowModal(false);
       setFormData({});
-      loadItems();
-      alert('Item saved successfully!');
+      
+      console.log('Fetching updated list...');
+      await loadItems();
+      console.log('✓ List updated');
+      console.log('================================\n');
+      
+      alert('✅ Item saved successfully!');
     } catch (error) {
-      console.error('Form submission error:', error);
+      console.error('\n========== SUBMIT ERROR ==========');
+      console.error('Error object:', error);
+      console.error('Error message:', error.message);
+      console.error('Response status:', error.response?.status);
+      console.error('Response data:', error.response?.data);
+      console.error('==================================\n');
+      
       const errorMessage = error.response?.data?.message || error.message || 'Unknown error occurred';
-      alert('Error saving item: ' + errorMessage);
+      alert('❌ ERROR saving item:\n\n' + errorMessage + '\n\n(Check browser console F12 for details)');
     }
   };
 
@@ -783,20 +807,23 @@ const AdminDashboard = () => {
                         type="text"
                         placeholder="Enter blog title"
                         value={formData.title || ''}
-                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        onChange={(e) => {
+                          const title = e.target.value;
+                          const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+                          setFormData({ ...formData, title, slug });
+                        }}
                         className="w-full px-4 py-3 bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-white/80 text-sm mb-2">Slug (URL friendly) *</label>
+                      <label className="block text-white/80 text-sm mb-2">Slug (URL friendly) - Auto-generated from title</label>
                       <input
                         type="text"
-                        placeholder="e.g., my-blog-post"
+                        placeholder="Auto-generated from title"
                         value={formData.slug || ''}
                         onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                         className="w-full px-4 py-3 bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                        required
                       />
                     </div>
                     <div>

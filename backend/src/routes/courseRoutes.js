@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const courseController = require('../controllers/courseController');
-const upload = require('../middleware/upload');
 
 // Get all courses
 router.get('/', courseController.getAllCourses);
@@ -13,10 +12,10 @@ router.get('/featured', courseController.getFeaturedCourses);
 router.get('/:id', courseController.getCourse);
 
 // Create new course
-router.post('/', upload.single('image'), courseController.createCourse);
+router.post('/', courseController.createCourse);
 
 // Update course
-router.put('/:id', upload.single('image'), courseController.updateCourse);
+router.put('/:id', courseController.updateCourse);
 
 // Delete course
 router.delete('/:id', courseController.deleteCourse);

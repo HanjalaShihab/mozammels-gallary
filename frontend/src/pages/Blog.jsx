@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, User, Clock, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import { fetchBlogs } from '../services/api';
 
 const Blog = () => {
   const [posts, setPosts] = useState([]);
@@ -15,18 +15,21 @@ const Blog = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get('/api/blogs');
-      setPosts(response.data);
+      console.log('Fetching blogs...');
+      const response = await fetchBlogs();
+      console.log('Blogs fetched:', response);
+      setPosts(response);
     } catch (error) {
       console.error('Error fetching blog posts:', error);
+      alert('Error loading blog posts. Check console for details.');
     } finally {
       setLoading(false);
     }
   };
 
   const filteredPosts = posts.filter(post =>
-    post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    post.content.toLowerCase().includes(searchTerm.toLowerCase())
+    (post.title?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+    (post.content?.toLowerCase() || '').includes(searchTerm.toLowerCase())
   );
 
   const formatDate = (dateString) => {
@@ -85,9 +88,12 @@ const Blog = () => {
                 <div className="md:flex">
                   <div className="md:w-1/3">
                     <img
-                      src={post.imageUrl}
+                      src={post.coverImage || post.imageUrl || 'https://via.placeholder.com/400x300?text=No+Image'}
                       alt={post.title}
                       className="w-full h-64 md:h-full object-cover"
+                      onError={(e) => {
+                        e.target.src = 'https://via.placeholder.com/400x300?text=No+Image';
+                      }}
                     />
                   </div>
                   <div className="md:w-2/3 p-6">
@@ -98,7 +104,7 @@ const Blog = () => {
                       </span>
                       <span className="flex items-center gap-1">
                         <User size={16} />
-                        {post.author || 'Mozammel'}
+                        {post.author?.name || 'Mozammel'}
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock size={16} />
@@ -109,7 +115,7 @@ const Blog = () => {
                       <Link to={`/blog/${post._id}`}>{post.title}</Link>
                     </h2>
                     <p className="text-gray-600 mb-4 line-clamp-3">
-                      {post.excerpt || post.content.substring(0, 200) + '...'}
+                      {post.excerpt || post.content?.substring(0, 200) + '...'}
                     </p>
                     <div className="flex items-center justify-between">
                       <div className="flex gap-2">

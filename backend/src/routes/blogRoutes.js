@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const blogController = require('../controllers/blogController');
-const upload = require('../middleware/upload');
 
 // Get all blog posts
 router.get('/', blogController.getAllPosts);
@@ -13,10 +12,10 @@ router.get('/latest', blogController.getLatestPosts);
 router.get('/:id', blogController.getPost);
 
 // Create new blog post
-router.post('/', upload.single('image'), blogController.createPost);
+router.post('/', blogController.createPost);
 
 // Update blog post
-router.put('/:id', upload.single('image'), blogController.updatePost);
+router.put('/:id', blogController.updatePost);
 
 // Delete blog post
 router.delete('/:id', blogController.deletePost);
