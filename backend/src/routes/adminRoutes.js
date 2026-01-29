@@ -8,6 +8,9 @@ const {
   deleteUser,
   getAllContacts,
   deleteContact,
+  updateContactStatus,
+  getAllSubscribers,
+  deleteSubscriber,
   bulkDelete
 } = require('../controllers/adminController');
 
@@ -26,6 +29,11 @@ router.delete('/users/:id', deleteUser);
 // Contact management
 router.get('/contacts', getAllContacts);
 router.delete('/contacts/:id', deleteContact);
+router.patch('/contacts/:id/status', updateContactStatus);
+
+// Newsletter subscribers
+router.get('/subscribers', getAllSubscribers);
+router.delete('/subscribers/:id', deleteSubscriber);
 
 // Bulk operations
 router.post('/bulk-delete', bulkDelete);

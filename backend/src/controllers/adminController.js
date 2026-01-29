@@ -4,6 +4,7 @@ const Blog = require('../models/Blog');
 const Course = require('../models/Course');
 const ShopItem = require('../models/ShopItem');
 const Contact = require('../models/Contact');
+const Subscriber = require('../models/Subscriber');
 
 // Get dashboard statistics
 exports.getDashboardStats = async (req, res) => {
@@ -15,8 +16,10 @@ exports.getDashboardStats = async (req, res) => {
       totalCourses,
       totalShopItems,
       totalContacts,
+      totalSubscribers,
       recentUsers,
-      recentContacts
+      recentContacts,
+      recentSubscribers
     ] = await Promise.all([
       User.countDocuments(),
       Artwork.countDocuments(),
@@ -24,8 +27,10 @@ exports.getDashboardStats = async (req, res) => {
       Course.countDocuments(),
       ShopItem.countDocuments(),
       Contact.countDocuments(),
+      Subscriber.countDocuments(),
       User.find().sort({ createdAt: -1 }).limit(5).select('-password'),
-      Contact.find().sort({ createdAt: -1 }).limit(5)
+      Contact.find().sort({ createdAt: -1 }).limit(5),
+      Subscriber.find().sort({ createdAt: -1 }).limit(5)
     ]);
 
     res.status(200).json({
@@ -37,10 +42,12 @@ exports.getDashboardStats = async (req, res) => {
           blogs: totalBlogs,
           courses: totalCourses,
           shopItems: totalShopItems,
-          contacts: totalContacts
+          contacts: totalContacts,
+          subscribers: totalSubscribers
         },
         recentUsers,
-        recentContacts
+        recentContacts,
+        recentSubscribers
       }
     });
   } catch (error) {
@@ -187,6 +194,91 @@ exports.deleteContact = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error deleting contact',
+      error: error.message
+    });
+  }
+};
+
+// Update contact status
+exports.updateContactStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    if (!['new', 'read', 'replied'].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid status. Must be new, read, or replied.'
+      });
+    }
+
+    const contact = await Contact.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+
+    if (!contact) {
+      return res.status(404).json({
+        success: false,
+        message: 'Contact not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Contact status updated successfully',
+      data: contact
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error updating contact status',
+      error: error.message
+    });
+  }
+};
+
+// Get all subscribers
+exports.getAllSubscribers = async (req, res) => {
+  try {
+    const subscribers = await Subscriber.find().sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: subscribers.length,
+      data: subscribers
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching subscribers',
+      error: error.message
+    });
+  }
+};
+
+// Delete subscriber
+exports.deleteSubscriber = async (req, res) => {
+  try {
+    const subscriber = await Subscriber.findById(req.params.id);
+
+    if (!subscriber) {
+      return res.status(404).json({
+        success: false,
+        message: 'Subscriber not found'
+      });
+    }
+
+    await subscriber.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: 'Subscriber deleted successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting subscriber',
       error: error.message
     });
   }

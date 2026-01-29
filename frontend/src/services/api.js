@@ -181,6 +181,12 @@ export const submitContactForm = async (data) => {
   return response.data;
 };
 
+// Newsletter
+export const subscribeNewsletter = async (data) => {
+  const response = await api.post('/newsletter/subscribe', data);
+  return response.data;
+};
+
 // Admin - Dashboard
 export const getDashboardStats = async () => {
   const response = await api.get('/admin/dashboard/stats');
@@ -195,6 +201,22 @@ export const getAllUsers = async () => {
 
 export const updateUserRole = async (id, role) => {
   const response = await api.put(`/admin/users/${id}/role`, { role });
+  return response.data;
+};
+
+export const updateContactStatus = async (id, status) => {
+  const response = await api.patch(`/admin/contacts/${id}/status`, { status });
+  return response.data;
+};
+
+// Admin - Newsletter Subscribers
+export const getAllSubscribers = async () => {
+  const response = await api.get('/admin/subscribers');
+  return response.data;
+};
+
+export const deleteSubscriber = async (id) => {
+  const response = await api.delete(`/admin/subscribers/${id}`);
   return response.data;
 };
 

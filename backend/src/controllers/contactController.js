@@ -1,52 +1,74 @@
 const nodemailer = require('nodemailer');
-
-// Contact model (optional - store in DB)
+const mongoose = require('mongoose');
 const Contact = require('../models/Contact');
+
+const isDBConnected = () => mongoose.connection.readyState === 1;
 
 // Submit contact form
 exports.submitContactForm = async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
-    
-    // Save to database (if you have a Contact model)
-    // const contact = new Contact({ name, email, subject, message });
-    // await contact.save();
-    
-    // Send email notification
-    const transporter = nodemailer.createTransporter({
-      service: process.env.EMAIL_SERVICE || 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
+
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({
+        message: 'All fields are required.',
+        success: false
+      });
+    }
+
+    if (!isDBConnected()) {
+      return res.status(503).json({
+        message: 'Database is not connected. Please try again later.',
+        success: false
+      });
+    }
+
+    const contact = new Contact({ name, email, subject, message });
+    await contact.save();
+
+    // Send email notification (optional)
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+      try {
+        const transporter = nodemailer.createTransport({
+          service: process.env.EMAIL_SERVICE || 'gmail',
+          auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASSWORD
+          }
+        });
+
+        const mailOptions = {
+          from: email,
+          to: process.env.CONTACT_EMAIL || process.env.EMAIL_USER,
+          subject: `Contact Form: ${subject}`,
+          text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
+          html: `
+            <h3>New Contact Form Submission</h3>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Subject:</strong> ${subject}</p>
+            <p><strong>Message:</strong></p>
+            <p>${message}</p>
+          `
+        };
+
+        await transporter.sendMail(mailOptions);
+      } catch (mailError) {
+        console.warn('Email notification failed:', mailError.message);
       }
-    });
-    
-    const mailOptions = {
-      from: email,
-      to: process.env.CONTACT_EMAIL || process.env.EMAIL_USER,
-      subject: `Contact Form: ${subject}`,
-      text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
-      html: `
-        <h3>New Contact Form Submission</h3>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Subject:</strong> ${subject}</p>
-        <p><strong>Message:</strong></p>
-        <p>${message}</p>
-      `
-    };
-    
-    await transporter.sendMail(mailOptions);
-    
-    res.status(200).json({ 
+    }
+
+    res.status(200).json({
       message: 'Your message has been sent successfully!',
-      success: true 
+      success: true,
+      data: contact
     });
   } catch (error) {
     console.error('Contact form error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: 'Failed to send message. Please try again later.',
-      success: false 
+      success: false,
+      error: error.message
     });
   }
 };

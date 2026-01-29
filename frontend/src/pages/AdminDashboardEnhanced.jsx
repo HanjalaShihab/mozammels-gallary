@@ -18,7 +18,8 @@ import {
   createCourse, updateCourse, deleteCourse,
   createBlog, updateBlog, deleteBlog,
   getDashboardStats, getAllUsers, updateUserRole, deleteUser,
-  getAllContacts, deleteContact
+  getAllContacts, deleteContact, updateContactStatus,
+  getAllSubscribers, deleteSubscriber
 } from '../services/api';
 
 const AdminDashboard = () => {
@@ -34,6 +35,7 @@ const AdminDashboard = () => {
   const [dashboardStats, setDashboardStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [contacts, setContacts] = useState([]);
+  const [subscribers, setSubscribers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeFilters, setActiveFilters] = useState({});
@@ -91,6 +93,12 @@ const AdminDashboard = () => {
       icon: <Mail size={20} />,
       color: 'from-teal-500 to-cyan-500'
     },
+    { 
+      id: 'subscribers', 
+      label: 'Subscribers', 
+      icon: <Star size={20} />,
+      color: 'from-yellow-500 to-amber-500'
+    },
   ];
 
   useEffect(() => {
@@ -113,6 +121,10 @@ const AdminDashboard = () => {
         case 'contacts':
           data = await getAllContacts();
           setContacts(data.data);
+          break;
+        case 'subscribers':
+          data = await getAllSubscribers();
+          setSubscribers(data.data);
           break;
         case 'artworks':
           data = await fetchArtworks();
@@ -161,6 +173,9 @@ const AdminDashboard = () => {
         case 'contacts':
           await deleteContact(id);
           break;
+        case 'subscribers':
+          await deleteSubscriber(id);
+          break;
       }
       loadItems();
     } catch (error) {
@@ -175,6 +190,15 @@ const AdminDashboard = () => {
       alert('User role updated successfully!');
     } catch (error) {
       alert('Error updating role: ' + error.message);
+    }
+  };
+
+  const handleContactStatusUpdate = async (contactId, status) => {
+    try {
+      await updateContactStatus(contactId, status);
+      loadItems();
+    } catch (error) {
+      alert('Error updating contact status: ' + error.message);
     }
   };
 
@@ -273,6 +297,10 @@ const AdminDashboard = () => {
     contact.subject.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const filteredSubscribers = subscribers.filter(subscriber =>
+    subscriber.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -349,7 +377,8 @@ const AdminDashboard = () => {
             shopItems: { icon: <ShoppingBag />, label: 'Shop Items', color: 'from-emerald-500 to-green-500' },
             courses: { icon: <BookOpen />, label: 'Courses', color: 'from-orange-500 to-yellow-500' },
             blogs: { icon: <FileText />, label: 'Blog Posts', color: 'from-rose-500 to-red-500' },
-            contacts: { icon: <Mail />, label: 'Messages', color: 'from-teal-500 to-cyan-500' }
+            contacts: { icon: <Mail />, label: 'Messages', color: 'from-teal-500 to-cyan-500' },
+            subscribers: { icon: <Star />, label: 'Subscribers', color: 'from-yellow-500 to-amber-500' }
           }[key];
 
           if (!statConfig) return null;
@@ -633,7 +662,7 @@ const AdminDashboard = () => {
               transition={{ delay: index * 0.05 }}
               className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-xl p-6 border border-white/10 shadow-lg"
             >
-              <div className="flex justify-between items-start mb-4">
+                <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-full flex items-center justify-center">
                     <Mail className="text-white" size={20} />
@@ -644,6 +673,15 @@ const AdminDashboard = () => {
                   </div>
                 </div>
                 <div className="flex gap-2">
+                  <span className={`px-3 py-1 rounded-full text-xs ${
+                    contact.status === 'replied'
+                      ? 'bg-green-500/20 text-green-400'
+                      : contact.status === 'read'
+                        ? 'bg-yellow-500/20 text-yellow-400'
+                        : 'bg-cyan-500/20 text-cyan-400'
+                  }`}>
+                    {contact.status || 'new'}
+                  </span>
                   <span className="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-xs">
                     {new Date(contact.createdAt).toLocaleDateString()}
                   </span>
@@ -663,12 +701,81 @@ const AdminDashboard = () => {
                   <p className="text-white/60 text-sm">{contact.message}</p>
                 </div>
                 <div className="flex gap-2">
-                  <button className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:shadow-lg transition-shadow text-sm">
+                  <button
+                    onClick={() => handleContactStatusUpdate(contact._id, 'read')}
+                    className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:shadow-lg transition-shadow text-sm"
+                  >
                     Mark as Read
                   </button>
-                  <button className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:shadow-lg transition-shadow text-sm">
+                  <button
+                    onClick={() => {
+                      handleContactStatusUpdate(contact._id, 'replied');
+                      const subject = encodeURIComponent(`Re: ${contact.subject || 'Your message'}`);
+                      window.location.href = `mailto:${contact.email}?subject=${subject}`;
+                    }}
+                    className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:shadow-lg transition-shadow text-sm"
+                  >
                     Reply
                   </button>
+                </div>
+              </div>
+            </motion.div>
+          </InteractiveCard>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderSubscribers = () => (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 className="text-3xl font-bold text-white">Newsletter Subscribers</h2>
+          <p className="text-white/60">View and manage newsletter subscribers</p>
+        </div>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40" size={20} />
+          <input
+            type="text"
+            placeholder="Search subscribers..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 pr-4 py-2 bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-cyan-500"
+          />
+        </div>
+      </div>
+
+      <div className="grid gap-4">
+        {filteredSubscribers.map((subscriber, index) => (
+          <InteractiveCard key={subscriber._id}>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-xl p-6 border border-white/10 shadow-lg"
+            >
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-amber-500 rounded-full flex items-center justify-center">
+                    <Star className="text-white" size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">{subscriber.email}</h3>
+                    <p className="text-white/60 text-sm">Source: {subscriber.source || 'unknown'}</p>
+                  </div>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <span className="px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs">
+                    {new Date(subscriber.createdAt).toLocaleDateString()}
+                  </span>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => handleDelete(subscriber._id)}
+                    className="p-2 bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-400 hover:from-red-500/30 hover:to-red-600/30 rounded-lg border border-red-500/20"
+                  >
+                    <Trash2 size={20} />
+                  </motion.button>
                 </div>
               </div>
             </motion.div>
@@ -1254,6 +1361,7 @@ const AdminDashboard = () => {
                 {activeTab === 'dashboard' && renderDashboard()}
                 {activeTab === 'users' && renderUsers()}
                 {activeTab === 'contacts' && renderContacts()}
+                {activeTab === 'subscribers' && renderSubscribers()}
                 {['artworks', 'shop', 'courses', 'blogs'].includes(activeTab) && renderContentManagement()}
               </>
             )}

@@ -22,7 +22,7 @@ import {
   Image as ImageIcon
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { fetchBlogs } from '../services/api';
+import { fetchBlogs, subscribeNewsletter } from '../services/api';
 
 const Blog = () => {
   const [posts, setPosts] = useState([]);
@@ -35,6 +35,8 @@ const Blog = () => {
   const [bookmarkedPosts, setBookmarkedPosts] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [imageErrors, setImageErrors] = useState({});
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterStatus, setNewsletterStatus] = useState('');
   const postsPerPage = 6;
 
   const containerRef = useRef(null);
@@ -118,6 +120,22 @@ const Blog = () => {
   const handleImageError = (postId) => {
     console.log('Image failed to load for post ID:', postId);
     setImageErrors(prev => ({ ...prev, [postId]: true }));
+  };
+
+  const handleNewsletterSubscribe = async () => {
+    if (!newsletterEmail.trim()) {
+      setNewsletterStatus('Please enter your email.');
+      return;
+    }
+    try {
+      setNewsletterStatus('Subscribing...');
+      await subscribeNewsletter({ email: newsletterEmail, source: 'blog-cta' });
+      setNewsletterStatus('Subscribed successfully!');
+      setNewsletterEmail('');
+    } catch (error) {
+      const msg = error.response?.data?.message || 'Subscription failed.';
+      setNewsletterStatus(msg);
+    }
   };
 
   // Get image URL with fallback
@@ -680,13 +698,21 @@ const Blog = () => {
               <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
                 <input
                   type="email"
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
                   placeholder="Your email address"
                   className="flex-1 px-6 py-3 rounded-full text-white-900 focus:outline-none focus:ring-2 focus:ring-white"
                 />
-                <button className="px-8 py-3 bg-white text-purple-700 font-bold rounded-full hover:bg-gray-100 transition-colors">
+                <button
+                  onClick={handleNewsletterSubscribe}
+                  className="px-8 py-3 bg-white text-purple-700 font-bold rounded-full hover:bg-gray-100 transition-colors"
+                >
                   Subscribe
                 </button>
               </div>
+              {newsletterStatus && (
+                <p className="mt-4 text-sm text-white/90">{newsletterStatus}</p>
+              )}
             </div>
           </motion.div>
         )}

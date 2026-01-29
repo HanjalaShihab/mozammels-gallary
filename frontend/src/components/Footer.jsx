@@ -1,9 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Twitter, Mail, Heart } from 'lucide-react';
+import { subscribeNewsletter } from '../services/api';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterStatus, setNewsletterStatus] = useState('');
+
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    if (!newsletterEmail.trim()) {
+      setNewsletterStatus('Please enter your email.');
+      return;
+    }
+    try {
+      setNewsletterStatus('Subscribing...');
+      await subscribeNewsletter({ email: newsletterEmail, source: 'footer' });
+      setNewsletterStatus('Subscribed successfully!');
+      setNewsletterEmail('');
+    } catch (error) {
+      const msg = error.response?.data?.message || 'Subscription failed.';
+      setNewsletterStatus(msg);
+    }
+  };
 
   return (
     <footer className="bg-gray-900 text-gray-300 pt-16 pb-8">
@@ -61,9 +81,11 @@ const Footer = () => {
           <div>
             <h3 className="text-white text-lg font-semibold mb-4">Newsletter</h3>
             <p className="text-sm mb-4">Subscribe to get updates on new artworks and courses.</p>
-            <form className="space-y-2">
+            <form className="space-y-2" onSubmit={handleNewsletterSubmit}>
               <input 
                 type="email" 
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
                 placeholder="Your email"
                 className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 
                          focus:outline-none focus:border-primary-500 text-sm"
@@ -75,6 +97,9 @@ const Footer = () => {
               >
                 Subscribe
               </button>
+              {newsletterStatus && (
+                <p className="text-xs text-gray-400">{newsletterStatus}</p>
+              )}
             </form>
           </div>
         </div>
