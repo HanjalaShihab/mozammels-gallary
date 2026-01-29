@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { 
   Palette, ShoppingBag, BookOpen, FileText, Plus, Edit, Trash2, 
   Users, Mail, BarChart, Shield, UserX, CheckCircle, XCircle,
@@ -839,14 +841,28 @@ const AdminDashboard = () => {
                     </div>
                     <div>
                       <label className="block text-white/80 text-sm mb-2">Content *</label>
-                      <textarea
-                        placeholder="Full blog content"
-                        value={formData.content || ''}
-                        onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                        className="w-full px-4 py-3 bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                        rows={6}
-                        required
-                      />
+                      <div className="bg-white rounded-lg overflow-hidden">
+                        <ReactQuill
+                          theme="snow"
+                          value={formData.content || ''}
+                          onChange={(content) => setFormData({ ...formData, content })}
+                          modules={{
+                            toolbar: [
+                              ['bold', 'italic', 'underline', 'strike'],
+                              ['blockquote', 'code-block'],
+                              [{ 'header': 1 }, { 'header': 2 }],
+                              [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                              [{ 'color': [] }, { 'background': [] }],
+                              [{ 'align': [] }],
+                              ['link', 'image'],
+                              ['clean']
+                            ]
+                          }}
+                          formats={['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block', 'header', 'list', 'color', 'background', 'align', 'link', 'image']}
+                          placeholder="Full blog content"
+                          style={{ minHeight: '300px' }}
+                        />
+                      </div>
                     </div>
                     <div>
                       <label className="block text-white/80 text-sm mb-2">Cover Image URL *</label>
@@ -1272,6 +1288,27 @@ const AdminDashboard = () => {
             Last Updated: {new Date().toLocaleTimeString()}
           </div>
         </div>
+
+        {/* Quill Editor Styles */}
+        <style>{`
+          .ql-editor {
+            color: #333 !important;
+            font-size: 16px;
+            line-height: 1.6;
+          }
+          .ql-editor.ql-blank::before {
+            color: #999 !important;
+          }
+          .ql-toolbar.ql-snow {
+            border-color: #ddd;
+          }
+          .ql-container.ql-snow {
+            border-color: #ddd;
+          }
+          .ql-editor h1 { font-size: 2em; }
+          .ql-editor h2 { font-size: 1.5em; }
+          .ql-editor h3 { font-size: 1.25em; }
+        `}</style>
       </motion.div>
     </div>
   );

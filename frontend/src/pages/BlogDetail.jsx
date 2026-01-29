@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, User, ArrowLeft, Share2, Heart } from 'lucide-react';
+import { Calendar, User, ArrowLeft, Share2, Heart, Trash2, MessageCircle } from 'lucide-react';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const BlogDetail = () => {
   const { id } = useParams();
+  const { user } = useAuth();
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [liked, setLiked] = useState(false);
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [replyText, setReplyText] = useState('');
 
   useEffect(() => {
     fetchBlogDetail();
@@ -42,6 +46,41 @@ const BlogDetail = () => {
       };
       setComments([...comments, newComment]);
       setComment('');
+    }
+  };
+
+  const handleDeleteComment = (index) => {
+    if (user && user.role === 'admin') {
+      setComments(comments.filter((_, i) => i !== index));
+    }
+  };
+
+  const handleReply = (commentIndex) => {
+    if (replyText.trim()) {
+      const updatedComments = [...comments];
+      const comment = updatedComments[commentIndex];
+      
+      if (!comment.replies) {
+        comment.replies = [];
+      }
+      
+      comment.replies.push({
+        author: user ? user.name : 'Anonymous',
+        text: replyText,
+        date: new Date().toLocaleDateString()
+      });
+      
+      setComments(updatedComments);
+      setReplyText('');
+      setReplyingTo(null);
+    }
+  };
+
+  const handleDeleteReply = (commentIndex, replyIndex) => {
+    if (user && user.role === 'admin') {
+      const updatedComments = [...comments];
+      updatedComments[commentIndex].replies.splice(replyIndex, 1);
+      setComments(updatedComments);
     }
   };
 
@@ -121,8 +160,20 @@ const BlogDetail = () => {
               <img
                 src={blog.coverImage || 'https://via.placeholder.com/800x500?text=No+Image'}
                 alt={blog.title}
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                className="absolute inset-0 w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                style={{ 
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  zIndex: 1,
+                  opacity: 1,
+                  display: 'block'
+                }}
                 onError={(e) => {
+                  console.log('Image load error:', blog.coverImage);
                   e.target.src = 'https://via.placeholder.com/800x500?text=No+Image';
                 }}
               />
@@ -199,11 +250,12 @@ const BlogDetail = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="prose prose-lg max-w-none mb-12"
+              className="prose prose-lg max-w-none mb-12 text-gray-800"
             >
-              <div className="text-gray-800 leading-relaxed whitespace-pre-wrap">
-                {blog.content}
-              </div>
+              <div 
+                className="leading-relaxed ql-editor"
+                dangerouslySetInnerHTML={{ __html: blog.content }}
+              />
             </motion.div>
 
             {/* Action Buttons */}
@@ -240,13 +292,13 @@ const BlogDetail = () => {
               <h2 className="text-3xl font-bold text-gray-900 mb-8">Comments ({comments.length})</h2>
 
               {/* Add Comment */}
-              <div className="bg-gray-50 rounded-lg p-6 mb-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Leave a Comment</h3>
+              <div className="bg-gray-800 rounded-lg p-6 mb-8 border border-gray-700">
+                <h3 className="text-lg font-semibold text-white mb-4">Leave a Comment</h3>
                 <textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder="Share your thoughts..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 resize-none"
+                  className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 resize-none"
                   rows="4"
                 />
                 <button
@@ -266,17 +318,94 @@ const BlogDetail = () => {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="bg-gray-50 rounded-lg p-6 border border-gray-200"
+                      className="bg-gray-800 rounded-lg p-6 border border-gray-700"
                     >
                       <div className="flex justify-between items-start mb-3">
-                        <p className="font-semibold text-gray-900">{cmt.author}</p>
-                        <span className="text-sm text-gray-500">{cmt.date}</span>
+                        <div>
+                          <p className="font-semibold text-white">{cmt.author}</p>
+                          <span className="text-sm text-gray-400">{cmt.date}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          {user && user.role === 'admin' && (
+                            <button
+                              onClick={() => handleDeleteComment(index)}
+                              className="text-gray-400 hover:text-red-500 transition-colors p-2 hover:bg-gray-700 rounded"
+                              title="Delete comment"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          )}
+                        </div>
                       </div>
-                      <p className="text-gray-700">{cmt.text}</p>
+                      <p className="text-white mb-4">{cmt.text}</p>
+                      {user && user.role === 'admin' && (
+                        <button
+                          onClick={() => setReplyingTo(replyingTo === index ? null : index)}
+                          className="text-sm text-primary-400 hover:text-primary-300 flex items-center gap-1 transition-colors"
+                        >
+                          <MessageCircle size={14} /> Reply
+                        </button>
+                      )}
+                      
+                      {/* Reply Form */}
+                      {replyingTo === index && user && user.role === 'admin' && (
+                        <div className="mt-4 pt-4 border-t border-gray-700">
+                          <textarea
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            placeholder="Write your reply..."
+                            className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 resize-none text-sm"
+                            rows="3"
+                          />
+                          <div className="flex gap-2 mt-2">
+                            <button
+                              onClick={() => handleReply(index)}
+                              className="px-3 py-1 bg-primary-600 text-white rounded text-sm font-semibold hover:bg-primary-700 transition-colors"
+                            >
+                              Reply
+                            </button>
+                            <button
+                              onClick={() => setReplyingTo(null)}
+                              className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm font-semibold hover:bg-gray-600 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Replies List */}
+                      {cmt.replies && cmt.replies.length > 0 && (
+                        <div className="mt-4 space-y-3">
+                          {cmt.replies.map((reply, replyIndex) => (
+                            <div
+                              key={replyIndex}
+                              className="bg-gray-700 rounded-lg p-4 ml-4 border border-gray-600"
+                            >
+                              <div className="flex justify-between items-start mb-2">
+                                <div>
+                                  <p className="font-semibold text-white text-sm">{reply.author}</p>
+                                  <span className="text-xs text-gray-400">{reply.date}</span>
+                                </div>
+                                {user && user.role === 'admin' && (
+                                  <button
+                                    onClick={() => handleDeleteReply(index, replyIndex)}
+                                    className="text-gray-400 hover:text-red-500 transition-colors p-1 hover:bg-gray-600 rounded"
+                                    title="Delete reply"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                )}
+                              </div>
+                              <p className="text-gray-100 text-sm">{reply.text}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </motion.div>
                   ))
                 ) : (
-                  <p className="text-gray-500 text-center py-8">No comments yet. Be the first to comment!</p>
+                  <p className="text-white text-center py-8">No comments yet. Be the first to comment!</p>
                 )}
               </div>
             </motion.div>
