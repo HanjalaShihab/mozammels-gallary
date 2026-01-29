@@ -34,6 +34,7 @@ app.use('/api/shop', require('./routes/shopRoutes'));
 app.use('/api/courses', require('./routes/courseRoutes'));
 app.use('/api/blogs', require('./routes/blogRoutes'));
 app.use('/api/contact', require('./routes/contactRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 
 // Database connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/artist_portfolio', {

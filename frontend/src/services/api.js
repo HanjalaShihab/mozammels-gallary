@@ -163,4 +163,43 @@ export const submitContactForm = async (data) => {
   return response.data;
 };
 
+// Admin - Dashboard
+export const getDashboardStats = async () => {
+  const response = await api.get('/admin/dashboard/stats');
+  return response.data;
+};
+
+// Admin - Users
+export const getAllUsers = async () => {
+  const response = await api.get('/admin/users');
+  return response.data;
+};
+
+export const updateUserRole = async (id, role) => {
+  const response = await api.put(`/admin/users/${id}/role`, { role });
+  return response.data;
+};
+
+export const deleteUser = async (id) => {
+  const response = await api.delete(`/admin/users/${id}`);
+  return response.data;
+};
+
+// Admin - Contacts
+export const getAllContacts = async () => {
+  const response = await api.get('/admin/contacts');
+  return response.data;
+};
+
+export const deleteContact = async (id) => {
+  const response = await api.delete(`/admin/contacts/${id}`);
+  return response.data;
+};
+
+// Admin - Bulk operations
+export const bulkDelete = async (model, ids) => {
+  const response = await api.post('/admin/bulk-delete', { model, ids });
+  return response.data;
+};
+
 export default api;

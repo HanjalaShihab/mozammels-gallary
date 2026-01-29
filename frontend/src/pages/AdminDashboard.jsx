@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
   Palette, ShoppingBag, BookOpen, FileText, Plus, Edit, Trash2, 
-  Image, DollarSign, Calendar, Eye, X, Save
+  Image, DollarSign, Calendar, Eye, X, Save, Users, Mail, BarChart
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -11,19 +11,24 @@ import {
   createArtwork, updateArtwork, deleteArtwork,
   createShopItem, updateShopItem, deleteShopItem,
   createCourse, updateCourse, deleteCourse,
-  createBlog, updateBlog, deleteBlog
+  createBlog, updateBlog, deleteBlog,
+  getDashboardStats, getAllUsers, updateUserRole, deleteUser,
+  getAllContacts, deleteContact
 } from '../services/api';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('artworks');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
   const [currentItem, setCurrentItem] = useState(null);
   const [formData, setFormData] = useState({});
+  const [dashboardStats, setDashboardStats] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [contacts, setContacts] = useState([]);
 
   // Redirect if not admin
   useEffect(() => {
@@ -33,10 +38,13 @@ const AdminDashboard = () => {
   }, [user, navigate]);
 
   const tabs = [
+    { id: 'dashboard', label: 'Dashboard', icon: <BarChart size={20} /> },
     { id: 'artworks', label: 'Artworks', icon: <Palette size={20} /> },
     { id: 'shop', label: 'Shop Items', icon: <ShoppingBag size={20} /> },
     { id: 'courses', label: 'Courses', icon: <BookOpen size={20} /> },
     { id: 'blogs', label: 'Blogs', icon: <FileText size={20} /> },
+    { id: 'users', label: 'Users', icon: <Users size={20} /> },
+    { id: 'contacts', label: 'Contacts', icon: <Mail size={20} /> },
   ];
 
   useEffect(() => {
@@ -48,6 +56,18 @@ const AdminDashboard = () => {
     try {
       let data;
       switch (activeTab) {
+        case 'dashboard':
+          data = await getDashboardStats();
+          setDashboardStats(data);
+          break;
+        case 'users':
+          data = await getAllUsers();
+          setUsers(data);
+          break;
+        case 'contacts':
+          data = await getAllContacts();
+          setContacts(data);
+          break;
         case 'artworks':
           data = await fetchArtworks();
           break;
