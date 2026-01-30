@@ -99,6 +99,12 @@ exports.createArtwork = async (req, res) => {
         folder: 'artist-portfolio/artworks'
       });
       imageUrl = result.secure_url;
+    } else {
+      imageUrl = req.body.imageUrl || req.body.imgUrl || req.body.image || '';
+    }
+
+    if (!imageUrl) {
+      return res.status(400).json({ message: 'Image URL is required.' });
     }
 
     const artwork = new Artwork({
