@@ -495,8 +495,6 @@ const Navbar = () => {
                           )}
                         </AnimatePresence>
                       </div>
-                        </div>
-                      </div>
                     ) : (
                       <Link
                         to={item.path}
