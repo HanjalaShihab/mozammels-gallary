@@ -25,7 +25,12 @@ import {
   Compass,
   Eye,
   Camera,
-  Heart
+  Heart,
+  Type,
+  PenTool,
+  Circle,
+  Square,
+  Triangle
 } from 'lucide-react';
 import ArtworkGrid from '../components/ArtworkGrid';
 import { fetchLatestArtworks } from '../services/api';
@@ -94,13 +99,14 @@ const Home = () => {
     canvas.height = window.innerHeight;
     
     // Create particles
-    particles.current = Array.from({ length: 80 }, () => ({
+    particles.current = Array.from({ length: 50 }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      vx: (Math.random() - 0.5) * 0.5,
-      vy: (Math.random() - 0.5) * 0.5,
-      radius: Math.random() * 2 + 1,
-      color: `hsla(${200 + Math.random() * 60}, 100%, 70%, ${Math.random() * 0.3 + 0.1})`
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      radius: Math.random() * 1.5 + 0.5,
+      color: `hsla(${Math.random() * 60 + 200}, 80%, 70%, ${Math.random() * 0.2 + 0.05})`,
+      shape: ['circle', 'square', 'triangle'][Math.floor(Math.random() * 3)]
     }));
 
     // Start animation
@@ -134,10 +140,21 @@ const Home = () => {
         if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
         if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
         
-        // Draw particle
+        // Draw particle based on shape
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
+        
+        if (p.shape === 'circle') {
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        } else if (p.shape === 'square') {
+          ctx.rect(p.x - p.radius, p.y - p.radius, p.radius * 2, p.radius * 2);
+        } else {
+          ctx.moveTo(p.x, p.y - p.radius);
+          ctx.lineTo(p.x - p.radius, p.y + p.radius);
+          ctx.lineTo(p.x + p.radius, p.y + p.radius);
+          ctx.closePath();
+        }
+        
         ctx.fill();
         
         // Draw connections to nearby particles
@@ -147,12 +164,12 @@ const Home = () => {
             const dy = p.y - other.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
             
-            if (distance < 150) {
+            if (distance < 120) {
               ctx.beginPath();
               ctx.moveTo(p.x, p.y);
               ctx.lineTo(other.x, other.y);
-              ctx.strokeStyle = p.color.replace(')', `, ${0.1 * (1 - distance/150)})`);
-              ctx.lineWidth = 0.5;
+              ctx.strokeStyle = p.color.replace(')', `, ${0.08 * (1 - distance/120)})`);
+              ctx.lineWidth = 0.3;
               ctx.stroke();
             }
           }
@@ -197,21 +214,22 @@ const Home = () => {
     },
   ];
 
-  // Floating icon component
-  const FloatingIcon = ({ icon, delay = 0 }) => (
+  // Minimal floating geometric shapes
+  const GeometricShape = ({ icon, delay = 0, className = '', size = 24 }) => (
     <motion.div
-      initial={{ y: 0 }}
+      initial={{ opacity: 0, scale: 0 }}
       animate={{ 
-        y: [0, -15, 0],
-        rotate: [0, 5, -5, 0]
+        opacity: [0.3, 0.6, 0.3],
+        scale: [1, 1.1, 1],
+        rotate: [0, 180, 360]
       }}
       transition={{
-        duration: 3,
+        duration: 8,
         delay,
         repeat: Infinity,
-        ease: "easeInOut"
+        ease: "linear"
       }}
-      className="inline-block"
+      className={`absolute ${className}`}
     >
       {icon}
     </motion.div>
@@ -235,8 +253,8 @@ const Home = () => {
       animate(mouseY, 0, { duration: 0.5 });
     };
     
-    const rotateX = useTransform(mouseY, [-0.5, 0.5], [10, -10]);
-    const rotateY = useTransform(mouseX, [-0.5, 0.5], [-10, 10]);
+    const rotateX = useTransform(mouseY, [-0.5, 0.5], [5, -5]);
+    const rotateY = useTransform(mouseX, [-0.5, 0.5], [-5, 5]);
     
     return (
       <motion.div
@@ -250,7 +268,6 @@ const Home = () => {
           transformStyle: 'preserve-3d' 
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-3xl blur-xl" />
         {children}
       </motion.div>
     );
@@ -262,66 +279,64 @@ const Home = () => {
       <canvas
         ref={canvasRef}
         className="fixed inset-0 pointer-events-none z-0"
-        style={{ opacity: 0.7 }}
+        style={{ opacity: 0.6 }}
       />
       
-      {/* Hero Section */}
+      {/* Hero Section - Minimal Creative Design */}
       <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Animated Background */}
-        <div className="absolute inset-0">
+        {/* Minimal Geometric Background */}
+        <div className="absolute inset-0 bg-black">
+          {/* Subtle grid lines */}
+          <div 
+            className="absolute inset-0 opacity-5"
+            style={{
+              backgroundImage: `linear-gradient(90deg, #fff 1px, transparent 1px),
+                               linear-gradient(180deg, #fff 1px, transparent 1px)`,
+              backgroundSize: '80px 80px'
+            }}
+          />
+          
+          {/* Gradient overlay */}
           <motion.div 
             className="absolute inset-0"
             animate={{
-              background: [
-                'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.2) 0%, transparent 50%)',
-                'radial-gradient(circle at 80% 50%, rgba(255, 119, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.2) 0%, transparent 50%)',
-                'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.2) 0%, transparent 50%)'
-              ]
+              opacity: [0.4, 0.6, 0.4],
             }}
-            transition={{ duration: 10, repeat: Infinity }}
+            transition={{ duration: 8, repeat: Infinity }}
+            style={{
+              background: 'radial-gradient(circle at 30% 30%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 70% 70%, rgba(255, 119, 198, 0.1) 0%, transparent 50%)',
+            }}
           />
           
-          {/* Grid Overlay */}
-          <div 
-            className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage: `linear-gradient(to right, #8882 1px, transparent 1px),
-                               linear-gradient(to bottom, #8882 1px, transparent 1px)`,
-              backgroundSize: '50px 50px'
-            }}
+          {/* Minimal floating geometric shapes */}
+          <GeometricShape 
+            icon={<Circle className="w-8 h-8 text-white/10" />}
+            delay={0}
+            className="top-20 left-20"
+          />
+          <GeometricShape 
+            icon={<Square className="w-6 h-6 text-white/10" />}
+            delay={1}
+            className="top-40 right-32"
+          />
+          <GeometricShape 
+            icon={<Triangle className="w-10 h-10 text-white/10" />}
+            delay={2}
+            className="bottom-40 left-32"
+          />
+          <GeometricShape 
+            icon={<Circle className="w-12 h-12 text-white/10" />}
+            delay={3}
+            className="bottom-20 right-20"
+          />
+          <GeometricShape 
+            icon={<Square className="w-8 h-8 text-white/10" />}
+            delay={4}
+            className="top-1/3 left-1/4"
           />
         </div>
         
-        {/* Floating Shapes */}
-        {[...Array(5)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute rounded-full"
-            initial={{ 
-              x: Math.random() * 100 + 'vw',
-              y: Math.random() * 100 + 'vh',
-              scale: 0
-            }}
-            animate={{ 
-              x: Math.random() * 100 + 'vw',
-              y: Math.random() * 100 + 'vh',
-              scale: [0, 1, 0],
-              rotate: 360
-            }}
-            transition={{
-              duration: 20 + i * 5,
-              repeat: Infinity,
-              delay: i * 2
-            }}
-            style={{
-              width: `${20 + Math.random() * 50}px`,
-              height: `${20 + Math.random() * 50}px`,
-              background: `radial-gradient(circle, hsl(${200 + i * 20}, 100%, 60%) 0%, transparent 70%)`,
-              filter: 'blur(10px)'
-            }}
-          />
-        ))}
-        
+        {/* Hero Content */}
         <motion.div 
           className="container mx-auto px-4 relative z-10"
           style={{ 
@@ -330,126 +345,134 @@ const Home = () => {
             y: titleY 
           }}
         >
-          <div className="max-w-6xl mx-auto text-center">
-            {/* Animated Badge */}
+          <div className="max-w-4xl mx-auto text-center">
+            {/* Minimal Typography Badge */}
             <motion.div
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", stiffness: 200, damping: 20 }}
-              className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-600/20 to-cyan-600/20 backdrop-blur-lg rounded-full mb-8 border border-white/10 shadow-lg"
-              whileHover={{ scale: 1.1 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="inline-flex items-center gap-2 px-4 py-2 mb-12"
             >
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              >
-                <Sparkles className="w-5 h-5 text-cyan-400" />
-              </motion.div>
-              <span className="text-white font-semibold text-sm md:text-base">
-                WELCOME TO DIGITAL ART REVOLUTION
-              </span>
-              <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 1, repeat: Infinity }}
-              >
-                <Zap className="w-5 h-5 text-yellow-400" />
-              </motion.div>
+              <div className="w-16 h-px bg-gradient-to-r from-transparent to-white/40" />
+              <span className="text-white/60 text-sm tracking-widest uppercase">DIGITAL ARTISTRY</span>
+              <div className="w-16 h-px bg-gradient-to-l from-transparent to-white/40" />
             </motion.div>
             
-            {/* Main Title */}
-            <motion.h1 
-              className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 leading-tight"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1 }}
+            {/* Main Minimal Title */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, delay: 0.4 }}
+              className="mb-12"
             >
-              <div className="relative">
-                <span className="text-white">CREATE</span>
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
-                  animate={{ x: ['-100%', '100%'] }}
-                  transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
-                />
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative">
+                  <motion.div
+                    animate={{ width: ['0%', '100%', '0%'] }}
+                    transition={{ duration: 3, repeat: Infinity, delay: 1 }}
+                    className="absolute -bottom-2 left-0 h-px bg-gradient-to-r from-transparent via-white to-transparent"
+                  />
+                  <h1 className="text-6xl md:text-8xl font-light tracking-tighter text-white">
+                    CREATE
+                  </h1>
+                </div>
+                
+                <div className="relative">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 1, delay: 0.8 }}
+                    className="absolute -inset-4 bg-gradient-to-r from-cyan-400/20 via-purple-400/20 to-pink-400/20 blur-xl rounded-full"
+                  />
+                  <h2 className="text-7xl md:text-9xl font-black tracking-tighter relative">
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400">
+                      INSPIRE
+                    </span>
+                  </h2>
+                </div>
+                
+                <div className="relative">
+                  <motion.div
+                    animate={{ width: ['100%', '0%', '100%'] }}
+                    transition={{ duration: 3, repeat: Infinity, delay: 2 }}
+                    className="absolute -top-2 left-0 h-px bg-gradient-to-r from-transparent via-white to-transparent"
+                  />
+                  <h3 className="text-5xl md:text-7xl font-light tracking-tighter text-white">
+                    INNOVATE
+                  </h3>
+                </div>
               </div>
-              <div className="mt-4">
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400">
-                  INSPIRE
-                </span>
-              </div>
-              <div className="mt-4">
-                <span className="text-white">INNOVATE</span>
-              </div>
-            </motion.h1>
+            </motion.div>
             
-            {/* Subtitle */}
+            {/* Subtle Description */}
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="text-xl md:text-2xl text-white/80 mb-10 max-w-3xl mx-auto leading-relaxed"
+              transition={{ delay: 0.8 }}
+              className="text-lg text-white/50 mb-12 max-w-2xl mx-auto font-light tracking-wide leading-relaxed"
             >
-              Where digital dreams meet artistic reality in an immersive creative universe
+              A digital canvas where creativity meets technology
             </motion.p>
             
-            {/* CTA Buttons */}
+            {/* Minimal CTA Buttons */}
             <motion.div 
               className="flex flex-col sm:flex-row gap-4 justify-center items-center"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
+              transition={{ delay: 1 }}
             >
               <InteractiveCard>
                 <Link
                   to="/gallery"
-                  className="group relative block px-8 py-4 md:px-12 md:py-6 bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 text-white font-bold text-lg md:text-xl rounded-xl overflow-hidden shadow-2xl"
+                  className="group relative block px-8 py-3 bg-transparent border border-white/20 text-white font-light text-lg rounded-full overflow-hidden hover:border-white/40 transition-all duration-300"
                 >
-                  <span className="relative z-10 flex items-center justify-center gap-3">
-                    <FloatingIcon icon={<Eye className="w-5 h-5 md:w-6 md:h-6" />} />
-                    ENTER GALLERY
-                    <motion.div
-                      animate={{ x: [0, 5, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    >
-                      <ArrowRight className="w-5 h-5 md:w-6 md:h-6" />
-                    </motion.div>
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    <Eye className="w-4 h-4" />
+                    EXPLORE GALLERY
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100"
+                    initial={false}
+                  />
                 </Link>
               </InteractiveCard>
               
               <InteractiveCard>
                 <Link
-                  to="/create"
-                  className="group relative block px-8 py-4 md:px-12 md:py-6 bg-black/50 backdrop-blur-lg border border-white/20 text-white font-bold text-lg md:text-xl rounded-xl overflow-hidden shadow-xl"
+                  to="/contact"
+                  className="group relative block px-8 py-3 bg-white text-black font-medium text-lg rounded-full overflow-hidden hover:bg-white/90 transition-all duration-300"
                 >
-                  <span className="relative z-10 flex items-center justify-center gap-3">
-                    <FloatingIcon icon={<Brush className="w-5 h-5 md:w-6 md:h-6" />} delay={0.5} />
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    <PenTool className="w-4 h-4" />
                     START CREATING
-                    <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-2 transition-transform" />
                   </span>
                 </Link>
               </InteractiveCard>
             </motion.div>
             
-            {/* Scroll Indicator */}
+            {/* Minimal Scroll Indicator */}
             <motion.div
-              animate={{ y: [0, 10, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.2 }}
+              className="absolute bottom-12 left-1/2 transform -translate-x-1/2"
             >
-              <div className="text-white/40 text-sm mb-2">SCROLL TO EXPLORE</div>
-              <div className="relative w-6 h-10 border border-white/20 rounded-full mx-auto">
+              <div className="flex flex-col items-center gap-2">
+                <div className="text-white/30 text-xs tracking-widest">SCROLL</div>
                 <motion.div
-                  animate={{ y: [0, 20, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="w-1 h-1 bg-gradient-to-b from-cyan-400 to-purple-400 rounded-full mx-auto mt-2"
-                />
+                  animate={{ y: [0, 8, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="relative"
+                >
+                  <div className="w-px h-8 bg-gradient-to-b from-white/40 via-white/20 to-transparent" />
+                </motion.div>
               </div>
             </motion.div>
           </div>
         </motion.div>
       </section>
 
+      {/* Rest of the page remains exactly the same */}
       {/* About Section */}
       <section className="py-20 relative overflow-hidden">
         <div className="container mx-auto px-4">
