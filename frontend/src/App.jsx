@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AuthProvider } from './context/AuthContext';
@@ -20,6 +20,20 @@ import ScrollToTop from './components/ScrollToTop';
 import './App.css';
 
 function App() {
+  useEffect(() => {
+    const apiBase = import.meta.env.VITE_API_URL || '';
+    const healthUrl = apiBase ? `${apiBase}/health` : '/api/health';
+
+    const ping = () => {
+      fetch(healthUrl, { method: 'GET' }).catch(() => undefined);
+    };
+
+    ping();
+    const intervalId = setInterval(ping, 5 * 60 * 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
     <AuthProvider>
       <Router>
