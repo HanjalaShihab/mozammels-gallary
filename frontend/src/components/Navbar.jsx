@@ -55,6 +55,19 @@ const Navbar = () => {
     { icon: <Package size={18} />, label: 'Orders', path: '/orders' },
   ];
 
+  const galleryCategories = [
+    { label: 'All Artworks', value: 'all' },
+    { label: 'Drawing', value: 'drawing' },
+    { label: 'Still life', value: 'still-life' },
+    { label: 'Figure painting', value: 'figure-painting' },
+    { label: 'Landscape', value: 'landscape' },
+    { label: 'Portrait', value: 'portrait' }
+  ];
+
+  const getGalleryLink = (value) => (
+    value === 'all' ? '/gallery' : `/gallery?category=${encodeURIComponent(value)}`
+  );
+
   return (
     <motion.nav
       initial={{ y: -100 }}
@@ -142,51 +155,117 @@ const Navbar = () => {
                   }}
                   transition={{ duration: 0.2 }}
                 />
-                <Link
-                  to={item.path}
-                  className={`relative flex items-center gap-3 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 group ${
-                    location.pathname === item.path
-                      ? 'text-white shadow-2xl'
-                      : 'text-gray-300 hover:text-white'
-                  }`}
-                >
-                  <motion.span
-                    animate={{ rotate: location.pathname === item.path ? [0, 360] : 0 }}
-                    transition={{ duration: 0.5 }}
-                    className={`transition-all duration-300 ${
+                {item.path === '/gallery' ? (
+                  <div className="relative group">
+                    <Link
+                      to={item.path}
+                      className={`relative flex items-center gap-3 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 group ${
+                        location.pathname === item.path
+                          ? 'text-white shadow-2xl'
+                          : 'text-gray-300 hover:text-white'
+                      }`}
+                    >
+                      <motion.span
+                        animate={{ rotate: location.pathname === item.path ? [0, 360] : 0 }}
+                        transition={{ duration: 0.5 }}
+                        className={`transition-all duration-300 ${
+                          location.pathname === item.path
+                            ? 'text-white'
+                            : 'text-gray-400 group-hover:text-white'
+                        }`}
+                      >
+                        {item.icon}
+                      </motion.span>
+                      <span>{item.label}</span>
+                      <ChevronDown size={16} className="text-gray-400 group-hover:text-white" />
+                      {location.pathname === item.path && (
+                        <>
+                          <motion.div
+                            layoutId="navbar-indicator"
+                            className="absolute inset-0 bg-gradient-to-r from-primary-500/30 to-secondary-500/30 rounded-2xl -z-10"
+                            transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                          />
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="absolute -top-1 -right-1"
+                          >
+                            <Star className="text-yellow-400" size={12} fill="currentColor" />
+                          </motion.div>
+                        </>
+                      )}
+                      <motion.div
+                        className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full ${
+                          location.pathname === item.path ? 'bg-gradient-to-r from-primary-400 to-secondary-400' : ''
+                        }`}
+                        initial={{ width: 0 }}
+                        animate={{ width: location.pathname === item.path ? '60%' : 0 }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    </Link>
+
+                    <div className="absolute left-0 mt-2 w-56 opacity-0 invisible group-hover:visible group-hover:opacity-100 transition-all duration-200">
+                      <div className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-2xl border border-white/10 shadow-2xl overflow-hidden backdrop-blur-xl">
+                        {galleryCategories.map((category) => (
+                          <Link
+                            key={category.value}
+                            to={getGalleryLink(category.value)}
+                            className="flex items-center justify-between px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
+                          >
+                            <span>{category.label}</span>
+                            <Sparkles size={14} className="text-primary-400" />
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <Link
+                    to={item.path}
+                    className={`relative flex items-center gap-3 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 group ${
                       location.pathname === item.path
-                        ? 'text-white'
-                        : 'text-gray-400 group-hover:text-white'
+                        ? 'text-white shadow-2xl'
+                        : 'text-gray-300 hover:text-white'
                     }`}
                   >
-                    {item.icon}
-                  </motion.span>
-                  <span>{item.label}</span>
-                  {location.pathname === item.path && (
-                    <>
-                      <motion.div
-                        layoutId="navbar-indicator"
-                        className="absolute inset-0 bg-gradient-to-r from-primary-500/30 to-secondary-500/30 rounded-2xl -z-10"
-                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                      />
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="absolute -top-1 -right-1"
-                      >
-                        <Star className="text-yellow-400" size={12} fill="currentColor" />
-                      </motion.div>
-                    </>
-                  )}
-                  <motion.div
-                    className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full ${
-                      location.pathname === item.path ? 'bg-gradient-to-r from-primary-400 to-secondary-400' : ''
-                    }`}
-                    initial={{ width: 0 }}
-                    animate={{ width: location.pathname === item.path ? '60%' : 0 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                </Link>
+                    <motion.span
+                      animate={{ rotate: location.pathname === item.path ? [0, 360] : 0 }}
+                      transition={{ duration: 0.5 }}
+                      className={`transition-all duration-300 ${
+                        location.pathname === item.path
+                          ? 'text-white'
+                          : 'text-gray-400 group-hover:text-white'
+                      }`}
+                    >
+                      {item.icon}
+                    </motion.span>
+                    <span>{item.label}</span>
+                    {location.pathname === item.path && (
+                      <>
+                        <motion.div
+                          layoutId="navbar-indicator"
+                          className="absolute inset-0 bg-gradient-to-r from-primary-500/30 to-secondary-500/30 rounded-2xl -z-10"
+                          transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                        />
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="absolute -top-1 -right-1"
+                        >
+                          <Star className="text-yellow-400" size={12} fill="currentColor" />
+                        </motion.div>
+                      </>
+                    )}
+                    <motion.div
+                      className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full ${
+                        location.pathname === item.path ? 'bg-gradient-to-r from-primary-400 to-secondary-400' : ''
+                      }`}
+                      initial={{ width: 0 }}
+                      animate={{ width: location.pathname === item.path ? '60%' : 0 }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </Link>
+                )}
               </motion.div>
             ))}
           </div>
@@ -363,27 +442,64 @@ const Navbar = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <Link
-                      to={item.path}
-                      onClick={() => setIsOpen(false)}
-                      className={`flex items-center justify-between gap-3 px-5 py-4 rounded-2xl transition-all duration-300 group ${
-                        location.pathname === item.path
-                          ? 'bg-gradient-to-r from-primary-500/20 to-secondary-500/20 border border-primary-500/30 text-white'
-                          : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 hover:text-white'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className={`transition-transform duration-300 group-hover:scale-110 ${
-                          location.pathname === item.path ? 'text-primary-400' : 'text-gray-400'
-                        }`}>
-                          {item.icon}
-                        </span>
-                        <span className="font-medium">{item.label}</span>
+                    {item.path === '/gallery' ? (
+                      <div className="space-y-2">
+                        <Link
+                          to={item.path}
+                          onClick={() => setIsOpen(false)}
+                          className={`flex items-center justify-between gap-3 px-5 py-4 rounded-2xl transition-all duration-300 group ${
+                            location.pathname === item.path
+                              ? 'bg-gradient-to-r from-primary-500/20 to-secondary-500/20 border border-primary-500/30 text-white'
+                              : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 hover:text-white'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className={`transition-transform duration-300 group-hover:scale-110 ${
+                              location.pathname === item.path ? 'text-primary-400' : 'text-gray-400'
+                            }`}>
+                              {item.icon}
+                            </span>
+                            <span className="font-medium">{item.label}</span>
+                          </div>
+                          <ChevronDown className="text-gray-400" size={16} />
+                        </Link>
+                        <div className="pl-6 space-y-2">
+                          {galleryCategories.map((category) => (
+                            <Link
+                              key={category.value}
+                              to={getGalleryLink(category.value)}
+                              onClick={() => setIsOpen(false)}
+                              className="flex items-center justify-between px-4 py-3 rounded-xl bg-gray-800/40 text-gray-300 hover:bg-gray-700/50 hover:text-white transition-all duration-300"
+                            >
+                              <span className="text-sm font-medium">{category.label}</span>
+                              <Sparkles className="text-primary-400" size={14} />
+                            </Link>
+                          ))}
+                        </div>
                       </div>
-                      {location.pathname === item.path && (
-                        <Sparkles className="text-yellow-400" size={16} />
-                      )}
-                    </Link>
+                    ) : (
+                      <Link
+                        to={item.path}
+                        onClick={() => setIsOpen(false)}
+                        className={`flex items-center justify-between gap-3 px-5 py-4 rounded-2xl transition-all duration-300 group ${
+                          location.pathname === item.path
+                            ? 'bg-gradient-to-r from-primary-500/20 to-secondary-500/20 border border-primary-500/30 text-white'
+                            : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 hover:text-white'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className={`transition-transform duration-300 group-hover:scale-110 ${
+                            location.pathname === item.path ? 'text-primary-400' : 'text-gray-400'
+                          }`}>
+                            {item.icon}
+                          </span>
+                          <span className="font-medium">{item.label}</span>
+                        </div>
+                        {location.pathname === item.path && (
+                          <Sparkles className="text-yellow-400" size={16} />
+                        )}
+                      </Link>
+                    )}
                   </motion.div>
                 ))}
 

@@ -1129,6 +1129,21 @@ const AdminDashboard = () => {
                       />
                     </div>
                     <div>
+                      <label className="block text-white/80 text-sm mb-2">Category</label>
+                      <select
+                        value={formData.category || ''}
+                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/5  border border-white/10 rounded-lg text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                      >
+                        <option value="" className="bg-gray-900">Select category</option>
+                        <option value="drawing" className="bg-gray-900">Drawing</option>
+                        <option value="still-life" className="bg-gray-900">Still life</option>
+                        <option value="figure-painting" className="bg-gray-900">Figure painting</option>
+                        <option value="landscape" className="bg-gray-900">Landscape</option>
+                        <option value="portrait" className="bg-gray-900">Portrait</option>
+                      </select>
+                    </div>
+                    <div>
                       <label className="block text-white/80 text-sm mb-2">Image URL</label>
                       <input
                         type="text"

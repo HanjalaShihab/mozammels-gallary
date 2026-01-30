@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Eye, Heart, Share2, Calendar, Maximize, Grid, List, Search } from 'lucide-react';
 import { fetchAllArtworks, fetchCategories } from '../services/api';
 
@@ -25,8 +25,13 @@ const ArtworkCard = ({ artwork, viewMode }) => {
         <div className="flex flex-col md:flex-row">
           <div className="md:w-1/3 relative overflow-hidden">
             <img
-              src={artwork.imageUrl || 'https://via.placeholder.com/400x300/eee?text=Artwork'}
+              src={artwork.imageUrl || artwork.image || 'https://via.placeholder.com/400x300/eee?text=Artwork'}
               alt={artwork.title}
+              onLoad={(e) => e.target.setAttribute('loaded', '')}
+              onError={(e) => {
+                e.currentTarget.src = 'https://via.placeholder.com/400x300/eee?text=Artwork';
+                e.currentTarget.setAttribute('loaded', '');
+              }}
               className="w-full h-64 md:h-full object-cover transform transition-transform duration-500 hover:scale-110"
             />
             {artwork.featured && (
@@ -107,8 +112,13 @@ const ArtworkCard = ({ artwork, viewMode }) => {
       {/* Image Container */}
       <div className="relative overflow-hidden aspect-square">
         <img
-          src={artwork.imageUrl || 'https://via.placeholder.com/400x300/eee?text=Artwork'}
+          src={artwork.imageUrl || artwork.image || 'https://via.placeholder.com/400x300/eee?text=Artwork'}
           alt={artwork.title}
+          onLoad={(e) => e.target.setAttribute('loaded', '')}
+          onError={(e) => {
+            e.currentTarget.src = 'https://via.placeholder.com/400x300/eee?text=Artwork';
+            e.currentTarget.setAttribute('loaded', '');
+          }}
           className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
         />
         
@@ -196,13 +206,26 @@ const ArtworkCard = ({ artwork, viewMode }) => {
 };
 
 const Gallery = () => {
+  const location = useLocation();
   const [artworks, setArtworks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [viewMode, setViewMode] = useState('grid');
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [search, setSearch] = useState('');
+
+  const normalizeCategory = (value) => value
+    ? value.toString().trim().toLowerCase().replace(/\s+/g, '-')
+    : '';
+
+  const curatedCategories = [
+    { label: 'Drawing', value: 'drawing' },
+    { label: 'Still life', value: 'still-life' },
+    { label: 'Figure painting', value: 'figure-painting' },
+    { label: 'Landscape', value: 'landscape' },
+    { label: 'Portrait', value: 'portrait' }
+  ];
 
   useEffect(() => {
     const loadData = async () => {
@@ -226,9 +249,38 @@ const Gallery = () => {
     loadData();
   }, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const categoryParam = normalizeCategory(params.get('category'));
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [location.search]);
+
+  const categoryOptions = useMemo(() => {
+    const map = new Map();
+
+    curatedCategories.forEach((category) => {
+      map.set(category.value, category.label);
+    });
+
+    (categories || []).forEach((category) => {
+      const value = normalizeCategory(category);
+      if (value && !map.has(value)) {
+        const label = category
+          .toString()
+          .replace(/-/g, ' ')
+          .replace(/\b\w/g, (char) => char.toUpperCase());
+        map.set(value, label);
+      }
+    });
+
+    return Array.from(map.entries()).map(([value, label]) => ({ value, label }));
+  }, [categories]);
+
   const filteredArtworks = useMemo(() => {
     return artworks.filter((artwork) => {
-      const matchesCategory = selectedCategory === 'All' || artwork.category === selectedCategory;
+      const matchesCategory = selectedCategory === 'all' || normalizeCategory(artwork.category) === selectedCategory;
       const query = search.trim().toLowerCase();
       const matchesSearch = !query ||
         artwork.title?.toLowerCase().includes(query) ||
@@ -292,10 +344,10 @@ const Gallery = () => {
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
-              <option value="All">All</option>
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
+              <option value="all">All</option>
+              {categoryOptions.map((category) => (
+                <option key={category.value} value={category.value}>
+                  {category.label}
                 </option>
               ))}
             </select>
