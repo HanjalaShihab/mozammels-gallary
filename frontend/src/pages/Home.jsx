@@ -449,6 +449,74 @@ const Home = () => {
           </div>
         </motion.div>
       </section>
+
+      {/* About Section */}
+      <section className="py-20 relative overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left Side - Image */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="relative"
+            >
+              <img
+                src="/uncle.jpg"
+                alt="Mozammel"
+                className="w-full rounded-2xl shadow-2xl"
+                onLoad={(e) => e.target.setAttribute('loaded', '')}
+              />
+            </motion.div>
+
+            {/* Right Side - Content */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="space-y-6"
+            >
+              <div>
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                  About <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">Mozammel</span>
+                </h2>
+                <p className="text-lg text-gray-600 leading-relaxed">
+                  Welcome to my artistic world! I'm Mozammel, a passionate digital artist with over 10 years 
+                  of experience creating masterpieces that blend traditional artistry with cutting-edge technology.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <p className="text-gray-600 leading-relaxed">
+                  My work explores the intersection of classical techniques and contemporary themes. Each creation 
+                  is a reflection of my experiences, observations, and the stories I want to tell through art.
+                </p>
+
+                <p className="text-gray-600 leading-relaxed">
+                  Beyond creating art, I'm dedicated to sharing my knowledge through courses and workshops, 
+                  helping aspiring artists discover their unique creative voice.
+                </p>
+              </div>
+
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="pt-4"
+              >
+                <Link
+                  to="/about"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-full hover:shadow-lg transition-shadow"
+                >
+                  Learn More About My Journey
+                  <ChevronRight className="w-5 h-5" />
+                </Link>
+              </motion.div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
       
       {/* Stats Section */}
       <section className="py-20 relative">

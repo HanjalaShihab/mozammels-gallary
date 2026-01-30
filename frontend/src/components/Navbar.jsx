@@ -83,8 +83,8 @@ const Navbar = () => {
         ))}
       </div>
 
-      <div className="container mx-auto px-4 py-4 relative">
-        <div className="flex items-center justify-between">
+      <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 relative">
+        <div className="flex items-center justify-between gap-3">
           {/* Animated Logo with 3D Effect */}
           <motion.div
             whileHover={{ scale: 1.05 }}
@@ -96,14 +96,14 @@ const Navbar = () => {
               transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
               className="absolute -inset-4 bg-gradient-to-r from-primary-500/20 via-secondary-500/20 to-accent-500/20 rounded-2xl blur-xl"
             />
-            <Link to="/" className="flex items-center space-x-4 relative z-10">
+            <Link to="/" className="flex items-center space-x-2 sm:space-x-3 md:space-x-4 relative z-10 min-w-fit">
               <motion.div
                 whileHover={{ rotate: 360, scale: 1.1 }}
                 transition={{ duration: 0.6 }}
-                className="relative"
+                className="relative flex-shrink-0"
               >
-                <div className="w-14 h-14 bg-gradient-to-br from-primary-500 via-secondary-500 to-accent-500 rounded-2xl flex items-center justify-center shadow-2xl">
-                  <Palette className="text-white" size={28} />
+                <div className="w-10 sm:w-12 md:w-14 h-10 sm:h-12 md:h-14 bg-gradient-to-br from-primary-500 via-secondary-500 to-accent-500 rounded-lg sm:rounded-xl md:rounded-2xl flex items-center justify-center shadow-2xl">
+                  <Palette className="text-white" size={20} sm:size={24} md:size={28} />
                 </div>
                 <motion.div
                   animate={{ rotate: [0, 360] }}
@@ -112,9 +112,9 @@ const Navbar = () => {
                 />
                 <Sparkles className="absolute -top-2 -right-2 text-yellow-400" size={16} />
               </motion.div>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-gray-300">MASTERPIECE STUDIO</span>
-                <span className="text-2xl font-display font-bold tracking-tight">
+              <div className="hidden sm:flex flex-col">
+                <span className="text-xs sm:text-sm font-medium text-gray-300">MASTERPIECE STUDIO</span>
+                <span className="text-lg sm:text-2xl font-display font-bold tracking-tight">
                   <span className="text-white">MOZAMMEL'S</span>
                   <span className="bg-gradient-to-r from-primary-400 via-secondary-400 to-accent-400 bg-clip-text text-transparent">
                     GALLERY
@@ -191,8 +191,8 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Auth Section with Dropdown */}
-          <div className="hidden lg:flex items-center gap-3">
+          {/* Auth Section with Dropdown - Desktop */}
+          <div className="hidden lg:flex items-center gap-2 sm:gap-3">
             {isAuthenticated ? (
               <div className="relative" ref={userMenuRef}>
                 <motion.button
@@ -332,30 +332,17 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Enhanced Mobile Menu Button */}
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+          {/* Mobile Menu Button */}
+          <button
             onClick={() => setIsOpen(!isOpen)}
-            className="lg:hidden p-3 rounded-2xl bg-gradient-to-r from-gray-800 to-gray-900 border border-white/10 relative overflow-hidden group"
+            className="lg:hidden p-2.5 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-gray-800 to-gray-900 border border-white/10 hover:border-white/20 transition-colors duration-200"
           >
-            <motion.div
-              animate={{ rotate: isOpen ? 180 : 0 }}
-              className="relative z-10"
-            >
-              {isOpen ? (
-                <X size={24} className="text-white" />
-              ) : (
-                <Menu size={24} className="text-white" />
-              )}
-            </motion.div>
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-primary-500/20 to-secondary-500/20"
-              initial={false}
-              animate={{ opacity: isOpen ? 1 : 0 }}
-              transition={{ duration: 0.3 }}
-            />
-          </motion.button>
+            {isOpen ? (
+              <X size={20} sm:size={24} className="text-white" />
+            ) : (
+              <Menu size={20} sm:size={24} className="text-white" />
+            )}
+          </button>
         </div>
 
         {/* Mobile Navigation with Glass Morphism */}
