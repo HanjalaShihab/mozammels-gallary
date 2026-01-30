@@ -9,6 +9,7 @@ const ArtworkCard = ({ artwork, viewMode }) => {
   const [isLiked, setIsLiked] = useState(false);
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short'
@@ -24,7 +25,7 @@ const ArtworkCard = ({ artwork, viewMode }) => {
         <div className="flex flex-col md:flex-row">
           <div className="md:w-1/3 relative overflow-hidden">
             <img
-              src={artwork.imageUrl}
+              src={artwork.imageUrl || 'https://via.placeholder.com/400x300/eee?text=Artwork'}
               alt={artwork.title}
               className="w-full h-64 md:h-full object-cover transform transition-transform duration-500 hover:scale-110"
             />
@@ -40,10 +41,12 @@ const ArtworkCard = ({ artwork, viewMode }) => {
               <div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
                   <Link to={`/gallery/${artwork._id}`} className="hover:text-primary-600 transition-colors">
-                    {artwork.title}
+                    {artwork.title || 'Untitled Artwork'}
                   </Link>
                 </h3>
-                <p className="text-gray-600 mb-4 line-clamp-2">{artwork.description}</p>
+                <p className="text-gray-600 mb-4 line-clamp-2">
+                  {artwork.description || 'No description available.'}
+                </p>
               </div>
               <button
                 onClick={() => setIsLiked(!isLiked)}
@@ -57,9 +60,11 @@ const ArtworkCard = ({ artwork, viewMode }) => {
             </div>
             
             <div className="flex flex-wrap gap-2 mb-4">
-              <span className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm">
-                {artwork.category}
-              </span>
+              {artwork.category && (
+                <span className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm">
+                  {artwork.category}
+                </span>
+              )}
               {artwork.tags?.slice(0, 3).map(tag => (
                 <span key={tag} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
                   {tag}
@@ -75,7 +80,7 @@ const ArtworkCard = ({ artwork, viewMode }) => {
                 </span>
                 <span className="flex items-center">
                   <Eye size={16} className="mr-1" />
-                  {artwork.views?.toLocaleString() || 0} views
+                  {(artwork.views || 0).toLocaleString()} views
                 </span>
               </div>
               <Link
@@ -102,7 +107,7 @@ const ArtworkCard = ({ artwork, viewMode }) => {
       {/* Image Container */}
       <div className="relative overflow-hidden aspect-square">
         <img
-          src={artwork.imageUrl}
+          src={artwork.imageUrl || 'https://via.placeholder.com/400x300/eee?text=Artwork'}
           alt={artwork.title}
           className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
         />
@@ -161,16 +166,18 @@ const ArtworkCard = ({ artwork, viewMode }) => {
         <div className="flex justify-between items-start mb-3">
           <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
             <Link to={`/gallery/${artwork._id}`} className="hover:text-primary-600 transition-colors">
-              {artwork.title}
+              {artwork.title || 'Untitled Artwork'}
             </Link>
           </h3>
-          <span className="px-2 py-1 bg-primary-50 text-primary-700 text-xs font-medium rounded">
-            {artwork.category}
-          </span>
+          {artwork.category && (
+            <span className="px-2 py-1 bg-primary-50 text-primary-700 text-xs font-medium rounded">
+              {artwork.category}
+            </span>
+          )}
         </div>
         
         <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-          {artwork.description}
+          {artwork.description || 'No description available.'}
         </p>
         
         <div className="flex items-center justify-between text-sm text-gray-500">
@@ -180,7 +187,7 @@ const ArtworkCard = ({ artwork, viewMode }) => {
           </span>
           <span className="flex items-center">
             <Eye size={14} className="mr-1" />
-            {artwork.views?.toLocaleString() || 0}
+            {(artwork.views || 0).toLocaleString()}
           </span>
         </div>
       </div>
@@ -209,6 +216,9 @@ const Gallery = () => {
         setCategories(categoriesData || []);
       } catch (err) {
         setError('Failed to load artworks. Please try again later.');
+        console.error('Error loading data:', err);
+        setArtworks([]);
+        setCategories([]);
       } finally {
         setLoading(false);
       }
@@ -306,7 +316,18 @@ const Gallery = () => {
           </div>
         ) : filteredArtworks.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-gray-500 text-lg">No artworks found.</p>
+            <div className="max-w-md mx-auto">
+              <p className="text-gray-500 text-lg mb-2">
+                {artworks.length === 0 
+                  ? "No artworks available yet." 
+                  : "No artworks match your search criteria."}
+              </p>
+              {artworks.length === 0 && (
+                <p className="text-gray-400 text-sm">
+                  Check back soon for new artworks!
+                </p>
+              )}
+            </div>
           </div>
         ) : (
           <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8' : 'space-y-6'}>

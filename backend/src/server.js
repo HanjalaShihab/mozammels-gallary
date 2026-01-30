@@ -37,15 +37,39 @@ app.use('/api/contact', require('./routes/contactRoutes'));
 app.use('/api/newsletter', require('./routes/newsletterRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 
-// Database connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/artist_portfolio', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('✓ MongoDB connected'))
-.catch(err => {
-  console.warn('⚠ MongoDB connection error. Running in demo mode.');
-  console.warn('Please ensure MongoDB is running or update MONGODB_URI in .env');
+// Database connection (serverless-safe, cached)
+const MONGODB_URI = process.env.MONGODB_URI || '';
+
+let cached = global.mongoose;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
+const connectDB = async () => {
+  if (!MONGODB_URI) {
+    return null;
+  }
+  if (cached.conn) {
+    return cached.conn;
+  }
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }).then((mongooseInstance) => mongooseInstance);
+  }
+  cached.conn = await cached.promise;
+  return cached.conn;
+};
+
+// Ensure DB connection for API requests
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+  } catch (err) {
+    console.warn('⚠ MongoDB connection error. Running in demo mode.');
+  }
+  next();
 });
 
 // Health check endpoint
