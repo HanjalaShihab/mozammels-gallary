@@ -28,8 +28,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "vercel-build": "vite build",
     "preview": "vite preview"
   },
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "eslintConfig": {
     "extends": [
       "react-app"

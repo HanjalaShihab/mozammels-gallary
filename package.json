@@ -2,7 +2,8 @@
   "scripts": {
     "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
     "backend": "npm run dev --prefix backend",
-    "frontend": "npm run dev --prefix frontend"
+    "frontend": "npm run dev --prefix frontend",
+    "build": "cd frontend && npm install && npm run build"
   },
   "dependencies": {
     "mongodb": "^7.0.0"

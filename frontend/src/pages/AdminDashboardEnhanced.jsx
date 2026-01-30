@@ -327,7 +327,7 @@ const AdminDashboard = () => {
   const InteractiveCard = ({ children, className = '', onClick }) => {
     return (
       <div
-        className={`relative ${className}`}
+        className={`relative transition-all duration-300 hover:-translate-y-1 ${className}`}
         onClick={onClick}
       >
         {children}
@@ -365,7 +365,7 @@ const AdminDashboard = () => {
               className="relative"
             >
               <InteractiveCard>
-                <div className={`p-6 rounded-2xl bg-gradient-to-br ${statConfig.color} text-white overflow-hidden`}>
+                <div className={`p-6 rounded-2xl bg-gradient-to-br ${statConfig.color} text-white overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-cyan-500/20`}>
                   <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-6 -mt-6" />
                   <div className="relative z-10">
                     <div className="flex justify-between items-start mb-4">
@@ -423,7 +423,7 @@ const AdminDashboard = () => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                  className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-300 hover:shadow-lg hover:border-opacity-60"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
@@ -469,7 +469,7 @@ const AdminDashboard = () => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                  className="p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-300 hover:shadow-lg hover:border-opacity-60"
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div>
@@ -542,10 +542,10 @@ const AdminDashboard = () => {
               placeholder="Search users..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-white/10  border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-cyan-500"
+              className="pl-10 pr-4 py-2 bg-white/10  border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-cyan-500 transition-all duration-300 hover:border-cyan-500/40"
             />
           </div>
-          <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:shadow-lg transition-shadow">
+          <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 hover:brightness-110">
             <Filter size={20} />
           </button>
         </div>
@@ -558,7 +558,7 @@ const AdminDashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 rounded-xl p-6 border border-white/10 shadow-lg"
+              className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 rounded-xl p-6 border border-white/10 shadow-lg transition-all duration-300 hover:border-cyan-500/40 hover:shadow-xl hover:shadow-cyan-500/10"
             >
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="flex items-center gap-4 flex-1">
@@ -586,14 +586,14 @@ const AdminDashboard = () => {
                   <select
                     value={user.role}
                     onChange={(e) => handleRoleChange(user._id, e.target.value)}
-                    className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-cyan-500"
+                    className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-cyan-500 transition-all duration-300 hover:border-cyan-500/40"
                   >
                     <option value="user" className="bg-gray-900">User</option>
                     <option value="admin" className="bg-gray-900">Admin</option>
                   </select>
                   <button
                     onClick={() => handleDelete(user._id)}
-                    className="p-2 bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-400 hover:from-red-500/30 hover:to-red-600/30 rounded-lg border border-red-500/20 transition-colors"
+                    className="p-2 bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-400 hover:from-red-500/30 hover:to-red-600/30 rounded-lg border border-red-500/20 transition-all duration-300 hover:shadow-lg hover:border-opacity-60"
                   >
                     <Trash2 size={20} />
                   </button>
@@ -620,7 +620,7 @@ const AdminDashboard = () => {
             placeholder="Search messages..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4 py-2 bg-white/10  border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-cyan-500"
+            className="pl-10 pr-4 py-2 bg-white/10  border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-cyan-500 transition-all duration-300 hover:border-cyan-500/40"
           />
         </div>
       </div>
@@ -632,7 +632,7 @@ const AdminDashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 rounded-xl p-6 border border-white/10 shadow-lg"
+              className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 rounded-xl p-6 border border-white/10 shadow-lg transition-all duration-300 hover:border-cyan-500/40 hover:shadow-xl hover:shadow-cyan-500/10"
             >
                 <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
@@ -659,7 +659,7 @@ const AdminDashboard = () => {
                   </span>
                   <button
                     onClick={() => handleDelete(contact._id)}
-                    className="p-2 bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-400 hover:from-red-500/30 hover:to-red-600/30 rounded-lg border border-red-500/20 transition-colors"
+                    className="p-2 bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-400 hover:from-red-500/30 hover:to-red-600/30 rounded-lg border border-red-500/20 transition-all duration-300 hover:shadow-lg hover:border-opacity-60"
                   >
                     <Trash2 size={20} />
                   </button>
@@ -710,7 +710,7 @@ const AdminDashboard = () => {
             placeholder="Search subscribers..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4 py-2 bg-white/10  border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-cyan-500"
+            className="pl-10 pr-4 py-2 bg-white/10  border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-cyan-500 transition-all duration-300 hover:border-cyan-500/40"
           />
         </div>
       </div>
@@ -722,7 +722,7 @@ const AdminDashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 rounded-xl p-6 border border-white/10 shadow-lg"
+              className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 rounded-xl p-6 border border-white/10 shadow-lg transition-all duration-300 hover:border-cyan-500/40 hover:shadow-xl hover:shadow-cyan-500/10"
             >
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-3">
@@ -740,7 +740,7 @@ const AdminDashboard = () => {
                   </span>
                   <button
                     onClick={() => handleDelete(subscriber._id)}
-                    className="p-2 bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-400 hover:from-red-500/30 hover:to-red-600/30 rounded-lg border border-red-500/20 transition-colors"
+                    className="p-2 bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-400 hover:from-red-500/30 hover:to-red-600/30 rounded-lg border border-red-500/20 transition-all duration-300 hover:shadow-lg hover:border-opacity-60"
                   >
                     <Trash2 size={20} />
                   </button>
@@ -768,12 +768,12 @@ const AdminDashboard = () => {
               placeholder={`Search ${activeTab}...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-white/10  border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-cyan-500"
+              className="pl-10 pr-4 py-2 bg-white/10  border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-cyan-500 transition-all duration-300 hover:border-cyan-500/40"
             />
           </div>
           <button
             onClick={() => openModal('add')}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-medium rounded-lg hover:shadow-xl transition-all"
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-medium rounded-lg hover:shadow-xl hover:shadow-cyan-500/50 transition-all duration-300 hover:brightness-110 hover:-translate-y-0.5"
           >
             <Plus size={20} />
             Add New
@@ -788,7 +788,7 @@ const AdminDashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 rounded-xl p-6 border border-white/10 shadow-lg"
+              className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 rounded-xl p-6 border border-white/10 shadow-lg transition-all duration-300 hover:border-cyan-500/40 hover:shadow-xl hover:shadow-cyan-500/10"
             >
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                 <div className="flex items-center gap-4 flex-1">
@@ -821,13 +821,13 @@ const AdminDashboard = () => {
                 <div className="flex gap-3">
                   <button
                     onClick={() => openModal('edit', item)}
-                    className="p-3 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-400 hover:from-blue-500/30 hover:to-cyan-500/30 rounded-lg border border-blue-500/20 transition-colors"
+                    className="p-3 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-400 hover:from-blue-500/30 hover:to-cyan-500/30 rounded-lg border border-blue-500/20 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 hover:border-blue-500/40"
                   >
                     <Edit size={18} />
                   </button>
                   <button
                     onClick={() => handleDelete(item._id)}
-                    className="p-3 bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-400 hover:from-red-500/30 hover:to-red-600/30 rounded-lg border border-red-500/20 transition-colors"
+                    className="p-3 bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-400 hover:from-red-500/30 hover:to-red-600/30 rounded-lg border border-red-500/20 transition-all duration-300 hover:shadow-lg hover:border-opacity-60"
                   >
                     <Trash2 size={18} />
                   </button>
@@ -861,7 +861,7 @@ const AdminDashboard = () => {
               </h3>
               <button
                 onClick={() => setShowModal(false)}
-                className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300 hover:shadow-lg hover:border-opacity-60"
               >
                 <XCircle size={24} />
               </button>
@@ -1152,7 +1152,7 @@ const AdminDashboard = () => {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 px-6 py-4 bg-white/10 text-white font-semibold rounded-lg hover:bg-white/20 transition-colors"
+                  className="flex-1 px-6 py-4 bg-white/10 text-white font-semibold rounded-lg hover:bg-white/20 transition-all duration-300 hover:shadow-lg"
                 >
                   Cancel
                 </button>
@@ -1302,7 +1302,7 @@ const AdminDashboard = () => {
               className={`flex items-center gap-3 px-6 py-3 rounded-xl font-medium transition-all ${
                 activeTab === tab.id
                   ? `bg-gradient-to-r ${tab.color} text-white shadow-lg`
-                  : 'bg-white/10 text-white/80 hover:bg-white/20'
+                  : 'bg-white/10 text-white/80 hover:bg-white/20 hover:shadow-lg hover:shadow-cyan-500/20 transition-all duration-300'
               }`}
             >
               {tab.icon}
