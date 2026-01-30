@@ -232,7 +232,7 @@ const Gallery = () => {
       try {
         setLoading(true);
         const [artworksData, categoriesData] = await Promise.all([
-          fetchAllArtworks(),
+          fetchAllArtworks({ sort: 'newest' }),
           fetchCategories()
         ]);
         setArtworks(artworksData || []);
